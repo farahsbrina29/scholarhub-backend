@@ -1,3 +1,4 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScholarModule } from './scholar/scholar.module';
@@ -8,10 +9,21 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    PrismaModule, // Simple import, no configuration needed here
-    ScholarModule, UserModule, AuthModule,
+    PrismaModule,
+    ScholarModule,
+    UserModule,    // Pastikan UserModule diimpor
+    AuthModule,    // Pastikan AuthModule diimpor
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log('📦 AppModule initialized with modules:', {
+      PrismaModule: 'loaded',
+      ScholarModule: 'loaded', 
+      UserModule: 'loaded',
+      AuthModule: 'loaded'
+    });
+  }
+}

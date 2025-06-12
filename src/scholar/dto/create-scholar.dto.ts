@@ -2,23 +2,23 @@ import { IsString, IsDateString } from 'class-validator';
 
 export class CreateScholarDto {
   @IsString()
-  nama_beasiswa: string;
+  scholarName: string;
 
   @IsString()
-  kategori: string;
+  category: string;
 
   @IsString()
-  deskripsi: string;
+  description: string;
 
   @IsString()
-  persyaratan_beasiswa: string;
+  scholarRequirement: string;
 
   @IsString()
-  kontak: string;
+  contact: string;
 
   @IsDateString()
-  tanggal_mulai: string;
+  startDate: string;
 
   @IsDateString()
-  tanggal_akhir: string;
+  endDate: string;
 }

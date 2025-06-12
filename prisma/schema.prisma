@@ -8,14 +8,18 @@ datasource db {
 }
 
 model Scholar {
-  id                   Int      @id @default(autoincrement())
-  nama_beasiswa        String   @db.VarChar(255)
-  kategori             String   @db.VarChar(255)
-  deskripsi            String   @db.VarChar(255)
-  persyaratan_beasiswa String   @db.VarChar(255)
-  kontak               String   @db.VarChar(255)
-  tanggal_mulai        DateTime @db.DateTime(0)
-  tanggal_akhir        DateTime @db.DateTime(0)
+  id                  Int      @id @default(autoincrement())
+  scholarName         String   @db.VarChar(255)
+  category            String   @db.VarChar(255)
+  description         String   @db.VarChar(255)
+  scholarRequirement  String   @db.VarChar(255)
+  contact             String   @db.VarChar(255)
+  startDate           DateTime @db.DateTime(0)
+  endDate             DateTime @db.DateTime(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  registrants ScholarRegist[]
 }
 
 model User {
@@ -25,6 +29,28 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  role      String
+  role      Role
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+model ScholarRegist {
+  id                  Int      @id @default(autoincrement())
+  name                String   @db.VarChar(255)
+  studentId           String   @db.VarChar(255)
+  email               String   @db.VarChar(255)
+  studyProgram        String   @db.VarChar(255)
+  semester            Int
+  registDate          DateTime @db.DateTime(0)
+  status              String   @default("menunggu persetujuan") @db.VarChar(255)
+  note                String?  @db.VarChar(255)
+  document            String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  scholarId Int
+  scholar   Scholar @relation(fields: [scholarId], references: [id])
+}

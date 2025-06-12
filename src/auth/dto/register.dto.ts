@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -11,7 +11,8 @@ export class RegisterDto {
   @IsString()
   name: string;
 
-  @IsString()
   @IsOptional()
-  role?: string = 'USER'; // default role
+  @IsEnum(['USER', 'ADMIN'], { message: 'Role must be either USER or ADMIN' })
+  role?: 'USER' | 'ADMIN' = 'USER';
+
 }

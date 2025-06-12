@@ -1,17 +1,18 @@
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
   email: string;
 
   @IsString()
-  name: string;
-
-  @IsString()
   @MinLength(6)
   password: string;
 
   @IsString()
+  name: string;
+
   @IsOptional()
-  role?: string = 'USER';
+  @IsEnum(['USER', 'ADMIN'], { message: 'Role must be either USER or ADMIN' })
+  role?: 'USER' | 'ADMIN' = 'USER';
+
 }

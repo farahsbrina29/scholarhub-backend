@@ -1,35 +1,70 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ScholarRegistService } from './scholar-regist.service';
-import { UpdateScholarRegistDto } from './dto/update-scholar-regist.dto';
 import { CreateScholarRegistDto } from './dto/create-scholar-regist.dto';
-
+import { UpdateScholarRegistDto } from './dto/update-scholar-regist.dto';
 
 @Controller('scholar-regist')
 export class ScholarRegistController {
   constructor(private readonly service: ScholarRegistService) {}
 
   @Post()
-  create(@Body() createDto: CreateScholarRegistDto) {
-    return this.service.create(createDto);
+  async create(@Body() createDto: CreateScholarRegistDto) {
+    try {
+      return await this.service.create(createDto);
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  async findAll() {
+    try {
+      return await this.service.findAll();
+    } catch (error) {
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    try {
+      return await this.service.findOne(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateDto: UpdateScholarRegistDto) {
-    return this.service.update(+id, updateDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateScholarRegistDto,
+  ) {
+    try {
+      return await this.service.update(+id, updateDto);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      return await this.service.remove(+id);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(error.message);
+    }
   }
 }

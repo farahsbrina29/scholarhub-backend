@@ -44,8 +44,8 @@ model ScholarRegist {
   email               String   @db.VarChar(255)
   studyProgram        String   @db.VarChar(255)
   semester            Int
-  registDate          DateTime @db.DateTime(0)
-  status              String   @default("menunggu persetujuan") @db.VarChar(255)
+  registDate          DateTime @default(now()) @db.DateTime(0)
+  status              ScholarStatus  @default(waiting_for_result)
   note                String?  @db.VarChar(255)
   document            String   @db.VarChar(255)
   createdAt DateTime @default(now())
@@ -54,3 +54,10 @@ model ScholarRegist {
   scholarId Int
   scholar   Scholar @relation(fields: [scholarId], references: [id])
 }
+
+enum ScholarStatus {
+  waiting_for_result
+  rejected
+  accepted
+}
+

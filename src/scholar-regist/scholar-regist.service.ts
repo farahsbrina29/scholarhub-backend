@@ -18,7 +18,6 @@ export class ScholarRegistService {
       registDate: new Date(), 
       status: 'waiting_for_result',
       note: dto.note ?? '',
-      document: dto.document,
       scholar: {
         connect: {
           id: dto.scholarId,
@@ -59,7 +58,6 @@ export class ScholarRegistService {
         semester: dto.semester,
         status: dto.status,
         note: dto.note,
-        document: dto.document,
         scholar: dto.scholarId
           ? { connect: { id: dto.scholarId } }
           : undefined,

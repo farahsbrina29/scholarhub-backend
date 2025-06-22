@@ -33,23 +33,15 @@ export class UpdateScholarRegistDto {
   @IsOptional()
   @IsInt()
   semester?: number;
-
-  @IsOptional()
-  @IsString()
-  document?: string;
-
-  @IsOptional()
-  @IsString()
-  note?: string;
-
+  
   @IsOptional()
   @IsEnum(ScholarStatus)
   status?: ScholarStatus;
 
   @IsOptional()
-  @IsDateString()
-  registDate?: Date;
-
+  @IsString()
+  note?: string;
+  
   @IsOptional()
   @IsInt()
   scholarId?: number;

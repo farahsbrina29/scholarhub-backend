@@ -7,13 +7,14 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ScholarRegistModule } from './scholar-regist/scholar-regist.module';
+import { WorkshopModule } from './workshop/workshop.module';
 
 @Module({
   imports: [
     PrismaModule,
     ScholarModule,
     UserModule,    // Pastikan UserModule diimpor
-    AuthModule, ScholarRegistModule,    // Pastikan AuthModule diimpor
+    AuthModule, ScholarRegistModule, WorkshopModule,    // Pastikan AuthModule diimpor
   ],
   controllers: [AppController],
   providers: [AppService],

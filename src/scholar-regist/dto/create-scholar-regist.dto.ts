@@ -1,11 +1,10 @@
-import { IsString, IsEmail, IsInt, IsDateString, IsEnum } from 'class-validator';
 
-// Enum yang sesuai dengan Prisma dan DB
-export enum ScholarStatus {
-  WAITING_FOR_RESULT = 'waiting_for_result',
-  REJECTED = 'rejected',
-  ACCEPTED = 'accepted',
-}
+import {
+  IsString,
+  IsEmail,
+  IsInt,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateScholarRegistDto {
   @IsString()
@@ -23,17 +22,9 @@ export class CreateScholarRegistDto {
   @IsInt()
   semester: number;
 
-  @IsDateString()
-  registDate: Date;
-
-  @IsEnum(ScholarStatus)
-  status: ScholarStatus;
-
+  @IsOptional()
   @IsString()
-  note: string;
-
-  @IsString()
-  document: string;
+  note?: string;
 
   @IsInt()
   scholarId: number;

@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -22,7 +23,7 @@ export class ScholarRegistController {
     try {
       return await this.service.create(createDto);
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new BadRequestException(`Failed to create data: ${error.message}`);
     }
   }
 
@@ -31,17 +32,22 @@ export class ScholarRegistController {
     try {
       return await this.service.findAll();
     } catch (error) {
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException('Failed to fetch scholar registrations');
     }
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+      throw new BadRequestException('Invalid ID format, must be a number');
+    }
+
     try {
-      return await this.service.findOne(+id);
+      return await this.service.findOne(numericId);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(`Error fetching data: ${error.message}`);
     }
   }
 
@@ -50,21 +56,31 @@ export class ScholarRegistController {
     @Param('id') id: string,
     @Body() updateDto: UpdateScholarRegistDto,
   ) {
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+      throw new BadRequestException('Invalid ID format, must be a number');
+    }
+
     try {
-      return await this.service.update(+id, updateDto);
+      return await this.service.update(numericId, updateDto);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(`Update failed: ${error.message}`);
     }
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+      throw new BadRequestException('Invalid ID format, must be a number');
+    }
+
     try {
-      return await this.service.remove(+id);
+      return await this.service.remove(numericId);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException(`Delete failed: ${error.message}`);
     }
   }
 }

@@ -1,8 +1,9 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { LocalAuthGuard } from './auth/local-auth.guard';
-import { LoginDto } from './auth/dto/login.dto';
-import { AuthService } from './auth/auth.service';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 export class AppController {
+  @Get()
+  getRoot(): string {
+    return 'Welcome to the API';
+  }
 }

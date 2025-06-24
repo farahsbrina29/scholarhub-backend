@@ -30,6 +30,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   role      Role
+  
+  registrants ScholarRegist[]
 }
 
 enum Role {
@@ -52,7 +54,11 @@ model ScholarRegist {
 
   scholarId Int
   scholar   Scholar @relation(fields: [scholarId], references: [id])
+
+  userId   Int
+  user     User    @relation(fields: [userId], references: [id])
 }
+
 
 enum ScholarStatus {
   waiting_for_result

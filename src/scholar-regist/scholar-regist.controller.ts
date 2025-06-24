@@ -1,3 +1,4 @@
+// src/scholar-regist/scholar-regist.controller.ts
 import {
   Controller,
   Get,
@@ -13,11 +14,18 @@ import {
 import { ScholarRegistService } from './scholar-regist.service';
 import { CreateScholarRegistDto } from './dto/create-scholar-regist.dto';
 import { UpdateScholarRegistDto } from './dto/update-scholar-regist.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'; 
+import {RolesGuard } from '../auth/roles.guard'; 
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from '../auth/roles.decorator';   
+import { UseGuards } from '@nestjs/common';
 
 @Controller('scholar-regist')
 export class ScholarRegistController {
   constructor(private readonly service: ScholarRegistService) {}
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
   @Post()
   async create(@Body() createDto: CreateScholarRegistDto) {
     try {
@@ -27,6 +35,8 @@ export class ScholarRegistController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get()
   async findAll() {
     try {
@@ -36,6 +46,8 @@ export class ScholarRegistController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const numericId = parseInt(id, 10);
@@ -51,6 +63,8 @@ export class ScholarRegistController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -69,6 +83,8 @@ export class ScholarRegistController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const numericId = parseInt(id, 10);
@@ -81,6 +97,22 @@ export class ScholarRegistController {
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(`Delete failed: ${error.message}`);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.USER)
+  @Get('user/:userId')
+  async findByUser(@Param('userId') userId: string) {
+    const id = parseInt(userId, 10);
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid user ID');
+    }
+
+    try {
+      return await this.service.findByUser(id);
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to fetch data: ${error.message}`);
     }
   }
 }

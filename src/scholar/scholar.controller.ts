@@ -14,11 +14,17 @@ import { ScholarService } from './scholar.service';
 import { Scholar } from '@prisma/client';
 import { CreateScholarDto } from './dto/create-scholar.dto';
 import { UpdateScholarDto } from './dto/update-scholar.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'; 
+import {RolesGuard } from '../auth/roles.guard'; 
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from '../auth/roles.decorator';   
+import { UseGuards } from '@nestjs/common';
 
 @Controller('scholar')
 export class ScholarController {
   constructor(private readonly scholarService: ScholarService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<Scholar[]> {
     try {
@@ -28,6 +34,8 @@ export class ScholarController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post()
   async create(@Body() dto: CreateScholarDto): Promise<Scholar> {
     try {
@@ -42,6 +50,7 @@ export class ScholarController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Scholar> {
     const numericId = parseInt(id, 10);
@@ -61,6 +70,8 @@ export class ScholarController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: UpdateScholarDto): Promise<Scholar> {
     const numericId = parseInt(id, 10);
@@ -75,7 +86,9 @@ export class ScholarController {
       throw new InternalServerErrorException('Failed to update scholar');
     }
   }
-
+  
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Scholar> {
     const numericId = parseInt(id, 10);

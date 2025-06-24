@@ -18,23 +18,33 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { GetUser } from './get-user.decorator'; // custom decorator
 
-// 👇 Tambahan penting untuk role guard
-import { Roles } from './roles.decorator';
-import { Role } from './roles.decorator';
-import { RolesGuard } from './roles.guard';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
   constructor(
     private readonly authService: AuthService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register user' })
+  @ApiCreatedResponse({
+    description: 'User registered successfully',
+  })
   async register(@Body() dto: RegisterDto) {
     try {
       const result = await this.authService.register(dto);
@@ -53,34 +63,59 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login pengguna' })
+  @ApiOkResponse({
+    description: 'Login berhasil.',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Login successful' },
+            user: {
+              type: 'object',
+              properties: {
+                id: { type: 'number', example: 1 },
+                email: { type: 'string', example: 'user@example.com' },
+                name: { type: 'string', example: 'Farah Sabrina' },
+                role: { type: 'string', example: 'USER' },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Gagal login karena kredensial tidak valid.',
+  })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     try {
       const result = await this.authService.login(dto, res);
-      if (result && result.user) {
+      if (result?.user) {
         this.logger.log(`${result.user.role} login: ${dto.email}`);
+        return {
+          message: 'Login successful',
+          user: result.user,
+        };
       } else {
         throw new UnauthorizedException('Login failed - invalid response');
       }
-
-      return {
-        message: 'Login successful',
-        user: result.user,
-      };
     } catch (error) {
       this.logger.error(`Login failed for ${dto.email}: ${error.message}`);
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
+      if (error instanceof UnauthorizedException) throw error;
       throw new InternalServerErrorException('Login failed');
     }
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
   async refresh(@Req() request: Request, @Res({ passthrough: true }) res: Response) {
     try {
-      const refreshToken = request.cookies?.refresh_token ||
-        (request.headers.authorization?.startsWith('Bearer ') ? request.headers.authorization.slice(7) : undefined) ||
+      const refreshToken =
+        request.cookies?.refresh_token ||
+        request.headers.authorization?.replace('Bearer ', '') ||
         request.body?.refresh_token;
 
       if (!refreshToken) {
@@ -94,36 +129,29 @@ export class AuthController {
       };
     } catch (error) {
       this.logger.error(`Refresh failed: ${error.message}`);
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
+      if (error instanceof UnauthorizedException) throw error;
       throw new InternalServerErrorException('Token refresh failed');
     }
   }
 
+  
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getMe(@Req() request: Request) {
-    try {
-      const accessToken = request.cookies?.access_token;
-      if (!accessToken) throw new UnauthorizedException('Access token not found');
-
-      const user = await this.authService.getMe(accessToken);
-      return {
-        message: 'User data retrieved successfully',
-        user,
-      };
-    } catch (error) {
-      this.logger.error(`Get me failed: ${error.message}`);
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to get user data');
-    }
+  @ApiOperation({ summary: 'Get authenticated user' })
+  @ApiOkResponse({
+    description: 'User data retrieved successfully',
+  })
+  async getMe(@GetUser() user: any) {
+    return {
+      message: 'User data retrieved successfully',
+      user,
+    };
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout user' })
   async logout(@Res({ passthrough: true }) res: Response) {
     const cookieOptions = {
       httpOnly: true,
@@ -143,6 +171,7 @@ export class AuthController {
 
   @Get('status')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Check auth status' })
   async checkAuthStatus(@Req() request: Request) {
     const accessToken = request.cookies?.access_token;
     const refreshToken = request.cookies?.refresh_token;
@@ -151,17 +180,6 @@ export class AuthController {
       isAuthenticated: !!(accessToken || refreshToken),
       hasAccessToken: !!accessToken,
       hasRefreshToken: !!refreshToken,
-    };
-  }
-
-  
-  @Get('admin-only')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN) 
-  @HttpCode(HttpStatus.OK)
-  async adminOnlyEndpoint() {
-    return {
-      message: 'This route is only accessible by ADMIN',
     };
   }
 }
